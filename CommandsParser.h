@@ -11,9 +11,9 @@ class CommandsParser
 		CommandsParser(Stream* s) : pStream(s){}
 		CommandsParser(Stream& s) : pStream(&s){}
 
-		// handler - пользовательская функция обработки входящих параметров
-		// в paramDelimiter - разделитель параметра и команды
-		// в stopDelimiters - разделители команд между собой
+		// handler - user-defined event func
+		// paramDelimiter - param name and param value delimiter
+		// в stopDelimiters - command delimiters
 		void begin(OnParamReceived handler, const char* paramDelimiter="=", const char* stopDelimiters="\r\n;&")
 		{
 			pUserFunc = handler;
@@ -30,27 +30,27 @@ class CommandsParser
 					char ch = pStream->read();
 					if(strchr(pStopDelimiters,ch))
 					{
-						// встретили стоповый символ - разделитель команд
-						// смотрим, есть ли у нас пара ключ-разделитель-значение
+						// find stop char
+						// look for possible key _delimiters_ value pair
 						const char* pDelim = strstr(workBuffer.c_str(),pParamDelimiter);
 						if(pDelim)
 						{
-							// есть разделитель, читаем ключ и значение
+							// find delimiters, read key/value
 							
-							// ключ будет до разделителя
+							// key before delimiter
 							const char* beginStr = workBuffer.c_str();
-							workBuffer[pDelim - beginStr] = 0; // завершаем строку нулём по центру, чтобы не дёргать память
+							workBuffer[pDelim - beginStr] = 0; // add zero after key
 							
-							// вызываем пользовательскую функцию
+							// call user func
 							pUserFunc(beginStr,pDelim + strlen(pParamDelimiter));
 
-							workBuffer = ""; // очищаем буфер
+							workBuffer = ""; // clear buffer
 						}
 						else
-								workBuffer = "";// разделитель не найден, просто очищаем входной буфер
+								workBuffer = "";// delimiters not found - bad format
 					}
 					else
-					 workBuffer += ch; // просто запоминаем текущий символ в буфер	
+					 workBuffer += ch; // store current char into the buffer
 				} // while
 		}
 		
