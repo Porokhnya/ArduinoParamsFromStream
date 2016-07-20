@@ -4,6 +4,7 @@
 #include <Arduino.h>
 //-------------------------------------------------------------------------------------------
 typedef void (*OnParamReceived)(const char* param, const char* value);
+#define MAX_BUFFER_LENGTH 255 // max length for incoming buffer
 //-------------------------------------------------------------------------------------------
 class CommandsParser
 {
@@ -25,6 +26,9 @@ class CommandsParser
 		
 		void update()
 		{
+			if(workBuffer.length() > MAX_BUFFER_LENGTH)
+				workBuffer = "";
+			
 				while(pStream && pStream->available())
 				{
 					char ch = pStream->read();
